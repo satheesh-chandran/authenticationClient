@@ -34,6 +34,7 @@ const fetchUserDetails = async function (req, res, next) {
   try {
     const token = await getToken(req.query.code, ClientSecret, ClientID);
     const userInfo = await getUserInfo(token);
+    console.log(userInfo);
     res.redirect('/');
   } catch (error) {
     return res.status('400').send('bad request');
