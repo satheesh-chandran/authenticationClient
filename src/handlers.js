@@ -13,29 +13,28 @@ const reqLogin = function (req, res) {
   res.redirect(url);
 };
 
-const getToken = function (code, ClientSecret, ClientID) {
+const getToken = function (code, clientSecret, clientId) {
   return request
     .post('http://localhost:8000/login/oauth/access_token')
-    .send({ code, ClientSecret, ClientID })
+    .send({ code, clientSecret, clientId })
     .set('Accept', 'application/json')
     .set('content-type', 'application/json')
-    .then(res => res.body.access_token);
+    .then(res => res.body.accessToken);
 };
 
 const getUserInfo = function (token) {
   return request
-    .get('http://localhost:8000/user')
-    .set('Authorization', `token ${token}`)
+    .get('http://localhost:8000/users')
+    .set('Authorization', token)
     .then(res => res.body);
 };
 
 const fetchUserDetails = async function (req, res, next) {
   const { ClientID, ClientSecret } = req.app.locals;
-  const code = req.query.code;
   try {
-    const token = await getToken(code, ClientSecret, ClientID);
+    const token = await getToken(req.query.code, ClientSecret, ClientID);
     const userInfo = await getUserInfo(token);
-    res.json(userInfo);
+    res.redirect('/');
   } catch (error) {
     return res.status('400').send('bad request');
   }
