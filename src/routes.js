@@ -1,11 +1,21 @@
 const express = require('express');
 const morgan = require('morgan');
+
+const { env } = process;
 const app = express();
 
-const {} = require('./handlers');
+const { reqLogin, fetchUserDetails } = require('./handlers');
 
-app.use(express.json());
+const { ClientID, ClientSecret } = env;
+
+app.locals = { ClientID, ClientSecret };
+
 app.use(morgan('tiny'));
+app.use(express.json());
 app.use(express.static('public'));
+
+app.get('/reqLogin', reqLogin);
+
+app.get('/user/auth', fetchUserDetails);
 
 module.exports = { app };
