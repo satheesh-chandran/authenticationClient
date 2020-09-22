@@ -1,4 +1,5 @@
 const request = require('superagent');
+const { readFileSync, writeFileSync } = require('fs');
 
 /*
   Authorization server = http://localhost:8000
@@ -29,13 +30,25 @@ const getUserInfo = function (token) {
     .then(res => res.body);
 };
 
-const fetchUserDetails = async function (req, res, next) {
+const formatPage = userInfo => {
+  const filePath = `${__dirname}/../public/user.html`;
+  let chunk = readFileSync(filePath, 'utf8');
+  chunk = chunk.replace(/__ID__/, `${userInfo.id}`);
+  chunk = chunk.replace(/__NAME__/, `${userInfo.name}`);
+  chunk = chunk.replace(/__USERNAME__/, `${userInfo.username}`);
+  chunk = chunk.replace(/__PASSWORD__/, `${userInfo.password}`);
+  chunk = chunk.replace(/__COMPANY__/, `${userInfo.company}`);
+  chunk = chunk.replace(/__EMAIL__/, `${userInfo.email}`);
+  writeFileSync('./public/template.html', chunk, 'utf8');
+};
+
+const fetchUserDetails = async function (req, res) {
   const { ClientID, ClientSecret } = req.app.locals;
   try {
     const token = await getToken(req.query.code, ClientSecret, ClientID);
     const userInfo = await getUserInfo(token);
-    console.log(userInfo);
-    res.redirect('/');
+    formatPage(userInfo);
+    res.redirect('/template.html');
   } catch (error) {
     return res.status('400').send('bad request');
   }
